@@ -3,6 +3,7 @@
 import sys
 import os
 import json
+import glob
 import qtpy.QtWidgets as qt
 import qtpy.QtGui as gui
 import qtpy.QtCore as core
@@ -243,9 +244,13 @@ class DeviceImage:
     def loadAnnotations(self):
         """
         Get the annotations. Only call this if the files exist
+        Need to load png/jpeg too
         """
-        filename = os.path.join(self.folder, 'deviceimage_annotations.json')
-        with open(filename, 'r') as fid:
+
+        json_filename = os.path.join(self.folder, 'deviceimage_annotations.json')
+        self.filename = glob.glob(os.path.join(self.folder, 'deviceimage_raw.*'))[0]
+        # this assumes there is only on of deviceimage_raw.*
+        with open(json_filename, 'r') as fid:
             self._data = json.load(fid)
 
     def updateValues(self, station):
@@ -257,7 +262,7 @@ class DeviceImage:
             for parameter in parameters.keys():
                 self._data[instrument][parameter]['value'] = str(station.components[instrument][parameter].get_latest())
 
-    def makePNG(self, counter):
+    def makePNG(self, counter, path=None):
         """
         Render the image with new voltage values and save it to disk
 
@@ -280,5 +285,7 @@ class DeviceImage:
                                                                self.filename)
 
         filename = 'deviceimage_{:03d}.png'.format(counter)
+        if path:
+            filename = os.path.join(path, filename)
         pixmap.save(filename, 'png')
         app.quit()
