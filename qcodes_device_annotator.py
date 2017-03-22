@@ -15,11 +15,10 @@ class MakeDeviceImage(qt.QWidget):
     Class for clicking and adding labels
     """
 
-    def __init__(self, app, folder, station):
+    def __init__(self, folder, station):
 
         super().__init__()
 
-        self.qapp = app
         self.folder = folder
         self.station = station
 
@@ -224,13 +223,15 @@ class DeviceImage:
         """
         Launch a Qt Widget to click
         """
-        app = qt.QApplication(sys.argv)
-        imagedrawer = MakeDeviceImage(app, self.folder, self.station)
+        if not qt.QApplication.instance():
+            app = qt.QApplication(sys.argv)
+        else:
+            app = qt.QApplication.instance()
+        imagedrawer = MakeDeviceImage(self.folder, self.station)
         app.exec_()
+        imagedrawer.close()
         self._data = imagedrawer._data
         self.filename = imagedrawer.filename
-        imagedrawer.close()
-        app.quit()
         self.saveAnnotations()
 
     def saveAnnotations(self):
@@ -271,21 +272,19 @@ class DeviceImage:
         """
         if self.filename is None:
             raise ValueError('No image selected!')
-
-        app = qt.QApplication(sys.argv)
-
+        if not qt.QApplication.instance():
+            app = qt.QApplication(sys.argv)
+        else:
+            app = qt.QApplication.instance()
         win = qt.QWidget()
         grid = qt.QGridLayout()
         win.setLayout(grid)
         win.imageCanvas = qt.QLabel()
         grid.addWidget(win.imageCanvas)
-
         win.imageCanvas, pixmap = MakeDeviceImage._renderImage(self._data,
                                                                win.imageCanvas,
                                                                self.filename)
-
         filename = '{:03d}_deviceimage.png'.format(counter)
         if path:
             filename = os.path.join(path, filename)
         pixmap.save(filename, 'png')
-        app.quit()
