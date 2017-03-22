@@ -284,7 +284,7 @@ class DeviceImage:
                                                                win.imageCanvas,
                                                                self.filename)
 
-        filename = 'deviceimage_{:03d}.png'.format(counter)
+        filename = '{:03d}_deviceimage.png'.format(counter)
         if path:
             filename = os.path.join(path, filename)
         pixmap.save(filename, 'png')
